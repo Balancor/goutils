@@ -1,4 +1,4 @@
-module goutils
+module github.com/Balancor/goutils
 
 go 1.13
 
