@@ -28,7 +28,7 @@ type ThreadPool struct {
 	JobQueue       *list.List
 }
 
-func newThreadPool(max_workers int32) *ThreadPool {
+func NewThreadPool(max_workers int32) *ThreadPool {
 	return &ThreadPool{
 		MaxWorkers:     max_workers,
 		WorkerNum:      0,
