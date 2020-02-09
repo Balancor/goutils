@@ -47,7 +47,7 @@ func ConnectToDBViaConfig(configPath string) (*sql.DB, error) {
 }
 
 func ConnectDBViaGORM(configPath string) (*gorm.DB, error) {
-	cfg, err := ini.Load("my.ini")
+	cfg, err := ini.Load(configPath)
 	if err != nil {
 		fmt.Printf("Fail to read file: %v", err)
 		os.Exit(1)
