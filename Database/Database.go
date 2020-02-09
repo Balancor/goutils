@@ -30,7 +30,7 @@ func ConnectToDB(host string, port int, user string,
 }
 
 func ConnectToDBViaConfig(configPath string) (*sql.DB, error) {
-	cfg, err := ini.Load("my.ini")
+	cfg, err := ini.Load(configPath)
 	if err != nil {
 		fmt.Printf("Fail to read file: %v", err)
 		os.Exit(1)
