@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	RUNNING  = 0
 	RESTART  = 1
 	SCHEDULE = 2
 	PAUSE    = 3
@@ -23,6 +24,7 @@ type ThreadPool struct {
 	MaxWorkers     int32 //最大的线程数目
 	WorkerNum      int32
 	Mutex          sync.Mutex
+	State          int
 	ControlChannel chan int
 	JobChannel     chan *Job
 	JobQueue       *list.List
@@ -32,6 +34,7 @@ func NewThreadPool(max_workers int32) *ThreadPool {
 	return &ThreadPool{
 		MaxWorkers:     max_workers,
 		WorkerNum:      0,
+		State:          RUNNING,
 		ControlChannel: make(chan int),
 		JobChannel:     make(chan *Job),
 		JobQueue:       list.New(),
@@ -39,6 +42,10 @@ func NewThreadPool(max_workers int32) *ThreadPool {
 }
 
 func (pool *ThreadPool) dispatch() {
+	if pool.State != RUNNING {
+		return
+	}
+
 	if pool.JobQueue.Len() == 0 {
 		return
 	}
@@ -67,7 +74,7 @@ func (pool *ThreadPool) dispatch() {
 	pool.ControlChannel <- SCHEDULE
 }
 
-func (pool *ThreadPool) master() {
+func (pool *ThreadPool) Start() {
 	go func() {
 		for {
 			select {
@@ -78,15 +85,20 @@ func (pool *ThreadPool) master() {
 			case control := <-pool.ControlChannel:
 				switch control {
 				case RESTART:
+					pool.State = RESTART
 					break
 				case SCHEDULE:
 					pool.dispatch()
 					break
 				case PAUSE:
+					pool.State = PAUSE
 					break
 				case STOP:
+					pool.State = STOP
 					break
 				case QUIT:
+					close(pool.JobChannel)
+					close(pool.ControlChannel)
 					break
 				}
 				// we have received a signal to stop
